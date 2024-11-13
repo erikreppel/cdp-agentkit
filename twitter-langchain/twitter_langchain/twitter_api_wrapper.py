@@ -1,5 +1,7 @@
 """Util that calls Twitter API."""
 
+import contextvars
+import inspect
 from collections.abc import Callable
 from typing import Any
 
@@ -32,6 +34,14 @@ class TwitterApiWrapper(BaseModel):
                 "Tweepy Twitter SDK is not installed. " "Please install it with `pip install tweepy`"
             ) from None
 
+        api_auth = tweepy.OAuth1UserHandler(
+            api_key,
+            api_secret,
+            access_token,
+            access_token_secret,
+            )
+
+        api = tweepy.API(api_auth)
 
         client = tweepy.Client(
             consumer_key=api_key,
@@ -41,9 +51,11 @@ class TwitterApiWrapper(BaseModel):
         )
 
         context = TwitterContext()
+        context.set_api(api)
         context.set_client(client)
 
         values["context"] = context
+        values["api"] = context.api
         values["client"] = context.client
         values["api_key"] = api_key
         values["api_secret"] = api_secret
