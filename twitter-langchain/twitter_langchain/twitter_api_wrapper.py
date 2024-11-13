@@ -1,17 +1,22 @@
 """Util that calls Twitter API."""
 
+import contextvars
 import inspect
 from collections.abc import Callable
 from typing import Any
 
+#  from contextvars_registry import ContextVarsRegistry
+from cdp_agentkit_core.actions.social.twitter import TwitterContext
 from langchain_core.utils import get_from_dict_or_env
 from pydantic import BaseModel, model_validator
 
+#  class TwitterContext(ContextVarsRegistry):
+#      client: tweepy.Client | None = None
 
 class TwitterApiWrapper(BaseModel):
     """Wrapper for Twitter API."""
 
-    client: Any | None = None
+    context: TwitterContext | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -29,6 +34,7 @@ class TwitterApiWrapper(BaseModel):
                 "Tweepy Twitter SDK is not installed. " "Please install it with `pip install tweepy`"
             ) from None
 
+
         client = tweepy.Client(
             consumer_key=api_key,
             consumer_secret=api_secret,
@@ -36,7 +42,11 @@ class TwitterApiWrapper(BaseModel):
             access_token_secret=access_token_secret,
         )
 
-        values["client"] = client
+        context = TwitterContext()
+        context.set_client(client)
+
+        values["context"] = context
+        values["client"] = context.client
         values["api_key"] = api_key
         values["api_secret"] = api_secret
         values["access_token"] = access_token
@@ -46,12 +56,14 @@ class TwitterApiWrapper(BaseModel):
 
     def run_action(self, func: Callable[..., str], **kwargs) -> str:
         """Run a Twitter Action."""
-        import tweepy
+        #  import tweepy
 
-        func_signature = inspect.signature(func)
-        first_kwarg = next(iter(func_signature.parameters.values()), None)
+        #  func_signature = inspect.signature(func)
+        #  first_kwarg = next(iter(func_signature.parameters.values()), None)
 
-        if first_kwarg and first_kwarg.annotation is tweepy.Client:
-            return func(self.client, **kwargs)
-        else:
-            return func(**kwargs)
+        return func(self.context, **kwargs)
+
+        #  if first_kwarg and first_kwarg.annotation is tweepy.Client:
+        #      return func(self.client, **kwargs)
+        #  else:
+        #      return func(**kwargs)
