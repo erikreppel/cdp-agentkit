@@ -1,15 +1,13 @@
 """Util that calls Twitter API."""
 
 import contextvars
-import inspect
 from collections.abc import Callable
 from typing import Any
 
 from langchain_core.utils import get_from_dict_or_env
 from pydantic import BaseModel, Field, model_validator
 
-from cdp_agentkit_core.actions.social.twitter.context import TwitterContext, context
-from cdp_agentkit_core.actions.social.twitter.mentions_monitor_start import MonitorMentionsThread
+from cdp_agentkit_core.actions.social.twitter.context import context
 
 
 class TwitterApiWrapper(BaseModel):
