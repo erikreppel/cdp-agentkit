@@ -46,7 +46,6 @@ class TwitterApiWrapper(BaseModel):
 
     def run_action(self, func: Callable[..., str], **kwargs) -> str:
         """Run a Twitter Action."""
-
         import tweepy
 
         func_signature = inspect.signature(func)
