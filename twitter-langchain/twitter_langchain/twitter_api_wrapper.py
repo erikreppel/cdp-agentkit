@@ -5,30 +5,17 @@ import inspect
 from collections.abc import Callable
 from typing import Any
 
-#  from contextvars_registry import ContextVarsRegistry
-#  from cdp_agentkit_core.actions.social.twitter import TwitterContext
 from langchain_core.utils import get_from_dict_or_env
 from pydantic import BaseModel, Field, model_validator
 
-#  from cdp_agentkit_core.actions.context import ContextVarField
 from cdp_agentkit_core.actions.social.twitter.context import TwitterContext, context
-#  from cdp_agentkit_core.actions.social.twitter.context import context
 from cdp_agentkit_core.actions.social.twitter.mentions_monitor_start import MonitorMentionsThread
 
-#  class TwitterContext(ContextVarsRegistry):
-#      client: tweepy.Client | None = None
 
 class TwitterApiWrapper(BaseModel):
     """Wrapper for Twitter API."""
 
-    #  twitterContext: TwitterContext | None = None
-    #  client:tweepy.Client = Field(..., description="twitter client")
-
-    #  ctx:Any = contextvars.ContextVar("ctx", default=None)
-    #  ctx:Any | None = None
-    #  = ContextVarField(..., description="context var")
-
-    ctx:Any = Field(..., description="context")
+    ctx: Any = Field(..., description="context")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -52,15 +39,6 @@ class TwitterApiWrapper(BaseModel):
                 "Tweepy Twitter SDK is not installed. " "Please install it with `pip install tweepy`"
             ) from None
 
-        #  api_auth = tweepy.OAuth1UserHandler(
-        #      api_key,
-        #      api_secret,
-        #      access_token,
-        #      access_token_secret,
-        #      )
-
-        #  api = tweepy.API(api_auth)
-
         client = tweepy.Client(
             bearer_token=bearer_token,
             consumer_key=api_key,
@@ -72,28 +50,6 @@ class TwitterApiWrapper(BaseModel):
         ctx = context()
         ctx.client.set(client)
 
-        #  cls.ctx = ctx
-
-        #  ctx = context.get_context()
-        #  ctx.set_client(client)
-
-        #  context.set_context(ctx)
-
-        #  context.set_client(client)
-        #  with context.current() as ctx:
-        #      ctx.client.set(client)
-
-        #  with context.context() as ctx:
-        #      ctx.set_client(client)
-
-        #  twitterContext = TwitterContext()
-        #  context.set_api(api)
-        #  twitterContext.set_client(client)
-
-        #  context.client.set(client)
-
-        #  values["twitterContext"] = twitterContext
-        #  values["api"] = api
         values["ctx"] = ctx
         values["client"] = client
         values["api_key"] = api_key
@@ -105,69 +61,11 @@ class TwitterApiWrapper(BaseModel):
 
     def run_action(self, func: Callable[..., str], **kwargs) -> str:
         """Run a Twitter Action."""
-        #  import tweepy
-
-        #  func_signature = inspect.signature(func)
-        #  first_kwarg = next(iter(func_signature.parameters.values()), None)
-
-        response = ""
-
-        #  with context.context() as ctx:
-        #      print("client")
-        #      print(ctx.get_client())
-
-            #  ctx.set_client(self.client)
-
-        #  ctx = contextvars.copy_context()
-        #  for var, value in ctx.items():
-        #      var.set(value)
 
         for var, value in self.ctx.items():
             var.set(value)
 
-        print("=== twitter wrapper ===")
-        ctx = context()
-        print(ctx.client.get())
-        #  print(context.get_client())
-        #  print(context.get_mentions())
-        #  print(context.thread.get())
-
-        
-        
-        #  print(context.unwrap())
-        #  print(get_thread())
-
-        #  if context.unwrap() is not None:
-        #      print("yay?")
-        #      print(context.unwrap().mentions.get())
-        
         response = func(**kwargs)
-
-
-        #  print("saved?")
-        #  if self._ctx is not None:
-        #      print(f"self.ctx:{self._ctx['monitor-thread']}")
-        
-        print("thread?")
-        print(f"ctx.get:{ctx.get('monitor-thread')}")
-
         self.ctx = contextvars.copy_context()
 
-        
-
-        #  mt = ctx.get("monitor-thread")
-        #  if mt is not None:
-        #      print("thread exists")
-        #      self.ctx.set("monitor-thread", mt)
-        #      #  self._mt = mt
-        #  else:
-        #      print("thread does not exist")
-
         return response
-
-        #  return response
-
-        #  if first_kwarg and first_kwarg.annotation is tweepy.Client:
-        #      return func(self.client, **kwargs)
-        #  else:
-        #      return func(**kwargs)
